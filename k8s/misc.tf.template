@@ -41,3 +41,8 @@ resource "aws_instance" "worker" {
 output "worker_addresses" {
     value = ["${join(",", aws_instance.worker.*.public_dns)}"]
 }
+
+#k8s.tf
+output "workers" {
+    value = "${module.k8s.worker_addresses}"
+}
