@@ -36,3 +36,8 @@ resource "aws_instance" "worker" {
         Name = "worker-${count.index}"
     }
 }
+
+
+output "worker_addresses" {
+    value = ["${join(",", aws_instance.worker.*.public_dns)}"]
+}
