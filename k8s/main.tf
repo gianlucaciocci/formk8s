@@ -21,7 +21,7 @@ resource "aws_security_group" "k8s" {
 }
 
 resource "template_file" "kubelet" {
-    template = "${path.module}/scripts/kubelet"
+    template = "${path.module}/scripts/minion/kubelet"
 
     vars {
         master_ip = "${aws_instance.master.private_ip}"
@@ -31,7 +31,7 @@ resource "template_file" "kubelet" {
 }
 
 resource "template_file" "config" {
-    template = "${path.module}/scripts/config"
+    template = "${path.module}/scripts/common/config"
 
     vars {
         master_ip = "${aws_instance.master.private_ip}"
@@ -41,7 +41,7 @@ resource "template_file" "config" {
 }
 
 resource "template_file" "flanneld" {
-    template = "${path.module}/scripts/flanneld"
+    template = "${path.module}/scripts/minion/flanneld"
 
     vars {
         master_ip = "${aws_instance.master.private_ip}"
@@ -58,23 +58,14 @@ resource "aws_instance" "master" {
     security_groups = ["${aws_security_group.k8s.name}"]
 
     connection {
+        type="ssh"
         user = "ubuntu"
         key_file = "${var.key_path}"
     }
 
     provisioner "file" {
-        source = "${path.module}/scripts/etcd"
-        destination = "/tmp/etcd"
-    }
-
-    provisioner "file" {
-        source = "${path.module}/scripts/apiserver"
-        destination = "/tmp/apiserver"
-    }
-
-    provisioner "file" {
-        source = "${path.module}/scripts/flannel-config.json"
-        destination = "/tmp/flannel-config.json"
+        source = "${path.module}/scripts/master/"
+        destination = "/tmp"
     }
 
     provisioner "remote-exec" {
@@ -88,41 +79,4 @@ resource "aws_instance" "master" {
     }
 }
 
-resource "aws_instance" "worker" {
 
-    depends_on = ["aws_instance.master"]
-
-    ami = "${lookup(var.ami, var.region)}"
-    instance_type = "${var.instance_type}"
-    key_name = "${var.key_name}"
-    count = "${var.servers}"
-    security_groups = ["${aws_security_group.k8s.name}"]
-    
-    connection {
-        user = "ubuntu"
-        key_file = "${var.key_path}"
-    }
-
-    provisioner "file" {
-        source = "${path.module}/scripts/proxy"
-        destination = "/tmp/proxy"
-    }
-
-    provisioner "remote-exec" {
-        inline = [
-            "cat <<'EOF' > /tmp/config\n${template_file.config.rendered}\nEOF",
-            "cat <<'EOF' > /tmp/kubelet\n${template_file.kubelet.rendered}\nEOF",
-            "cat <<'EOF' > /tmp/flanneld\n${template_file.flanneld.rendered}\nEOF"
-        ]
-    }
-
-    provisioner "remote-exec" {
-        scripts = [
-            "${path.module}/scripts/worker.sh",
-        ]
-    }
-
-    tags {
-        Name = "worker-${count.index}"
-    }
-}

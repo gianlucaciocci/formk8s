@@ -1,0 +1,38 @@
+resource "aws_instance" "worker" {
+
+    depends_on = ["aws_instance.master"]
+
+    ami = "${lookup(var.ami, var.region)}"
+    instance_type = "${var.instance_type}"
+    key_name = "${var.key_name}"
+    count = "${var.servers}"
+    security_groups = ["${aws_security_group.k8s.name}"]
+    
+    connection {
+        user = "ubuntu"
+        key_file = "${var.key_path}"
+    }
+
+    provisioner "file" {
+        source = "${path.module}/scripts/proxy"
+        destination = "/tmp/proxy"
+    }
+
+    provisioner "remote-exec" {
+        inline = [
+            "cat <<'EOF' > /tmp/config\n${template_file.config.rendered}\nEOF",
+            "cat <<'EOF' > /tmp/kubelet\n${template_file.kubelet.rendered}\nEOF",
+            "cat <<'EOF' > /tmp/flanneld\n${template_file.flanneld.rendered}\nEOF"
+        ]
+    }
+
+    provisioner "remote-exec" {
+        scripts = [
+            "${path.module}/scripts/worker.sh",
+        ]
+    }
+
+    tags {
+        Name = "worker-${count.index}"
+    }
+}
