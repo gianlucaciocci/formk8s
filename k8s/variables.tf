@@ -1,22 +1,22 @@
 variable "ami" {
     default = {
-        eu-west-1 = "ami-c9c075ba"
+        eu-west-1 = "ami-ee6b189d"
     }
 }
 
 variable "master_ami" {
     default = {
-        eu-west-1 = "ami-c9c075ba"
+        eu-west-1 = "ami-ee6b189d"
     }
 }
 
 variable "key_name" {
-    default = "k8s"
+    default = "model-office-aws"
     description = "SSH key name in your AWS account for AWS instances."
 }
 
 variable "key_path" {
-    default = "~/.ssh/id_rsa_k8s"
+    default = "/keys/model-office-aws.pem"
     description = "Path to the private key specified by key_name."
 }
 
