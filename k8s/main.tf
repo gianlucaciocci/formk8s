@@ -58,7 +58,7 @@ resource "aws_instance" "master" {
     security_groups = ["${aws_security_group.k8s.name}"]
 
     connection {
-        user = "centos"
+        user = "ubuntu"
         key_file = "${var.key_path}"
     }
 
@@ -99,7 +99,7 @@ resource "aws_instance" "worker" {
     security_groups = ["${aws_security_group.k8s.name}"]
     
     connection {
-        user = "centos"
+        user = "ubuntu"
         key_file = "${var.key_path}"
     }
 

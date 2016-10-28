@@ -11,12 +11,12 @@ variable "master_ami" {
 }
 
 variable "key_name" {
-    default = "model-office-aws"
+    default = "modelofficeaws"
     description = "SSH key name in your AWS account for AWS instances."
 }
 
 variable "key_path" {
-    default = "/keys/model-office-aws.pem"
+    default = "~/.ssh/modelofficeaws.pem"
     description = "Path to the private key specified by key_name."
 }
 
