@@ -12,6 +12,4 @@ output "master" {
     value = "${module.k8s.master_address}"
 }
 
-output "workers" {
-    value = "${module.k8s.worker_addresses}"
-}
+
