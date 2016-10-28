@@ -16,7 +16,7 @@ variable "key_name" {
 }
 
 variable "key_path" {
-    default = "~/.ssh/modelofficeaws.pem"
+    default = "../../.ssh/modelofficeaws.pem"
     description = "Path to the private key specified by key_name."
 }
 
